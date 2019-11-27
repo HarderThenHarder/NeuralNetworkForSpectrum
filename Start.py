@@ -14,6 +14,7 @@ import numpy as np
 from ColorMapping import ColorMapping
 import cv2
 import tkinter.messagebox as msg
+from DataVision import DataVision
 
 WIDTH = 720
 HEIGHT = 500
@@ -30,6 +31,11 @@ y = None
 NN = None
 
 
+def show_data_distribution(X, y):
+    dv = DataVision()
+    dv.plot_vision_result(X, y)
+
+
 def get_train_file():
     global train_dataset, train_dataset_len, X, y, train_dim, class_number
 
@@ -41,9 +47,13 @@ def get_train_file():
         X = train_dataset[:, 1:]
         y = train_dataset[:, 0]
         train_dim = (X.shape[1], )
-        class_number = max(y) + 1
+        class_number = int(max(y)) + 1
         file_dir, file_name = os.path.split(train_file_path)
         train_file_label["text"] = "Train Data File:        " + file_name + " (Len: %d)" % train_dataset_len
+
+        flag = msg.askokcancel("DataVision", "Would you like to see your data distribution (This may take a while to draw the result picture)?")
+        if flag:
+            show_data_distribution(X, y)
 
 
 def start():
@@ -74,10 +84,6 @@ def save_model():
     model_name = simpledialog.askstring("Set model name", "Input the name of saving model: ", initialvalue="model1")
     saved_name = model_name + ".h5"
     NN.save_model(saved_name)
-
-
-def main():
-    win.mainloop()
 
 
 def get_model_file():
@@ -137,10 +143,18 @@ def get_image_file():
 
         cm = ColorMapping(mat_matrix)
         img = cm.map_color()
-        cv2.imshow("Result Image", img)
-        cv2.waitKey(0)
+        while True:
+            cv2.imshow("Result Image", img)
+            if cv2.waitKey(1) == ord('q'):
+                break
+            if cv2.getWindowProperty("Result Image", cv2.WND_PROP_AUTOSIZE) < 1:
+                break
         cm.save_color_image("result.jpg")
         print("\n->Result Image saved as: result.jpg")
+
+
+def main():
+    win.mainloop()
 
 
 win = tk.Tk()

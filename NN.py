@@ -38,16 +38,21 @@ class NN:
 
     def predict(self, X_test):
         result_list = []
+        result_class_number = 0
+
         print("\nPredicting....\n")
         for i in range(len(X_test)):
             x = X_test[i].reshape(-1, len(X_test[i]))
-            result = self.model.predict(x)
+            result = self.model.predict(x)[0]
             result_list.append(np.argmax(result))
+            if result_class_number == 0:
+                result_class_number = len(result)
+
         print("\n-> The Prediction Result is: ")
         for result in result_list:
             print(result, end='')
         print("\n   <", end='')
-        for i in range(max(result_list) + 1):
+        for i in range(result_class_number):
             print("  %d : %3d  |" % (i, result_list.count(i)), end='')
         print("   >\n")
 
